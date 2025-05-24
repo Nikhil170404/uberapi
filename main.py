@@ -62,7 +62,7 @@ def mark_as_used(number):
 def extract_tokens_and_cookies(session):
     try:
         logging.info("Fetching initial page to extract dynamic tokens...")
-        res = session.get(UBER_LOGIN_URL.strip(), headers=HEADERS)
+        res = session.get(UBER_LOGIN_URL.strip().replace(" ", ""), headers=HEADERS)
         res.raise_for_status()
 
         # Extract marketing visitor ID from Set-Cookie header
@@ -113,7 +113,7 @@ def submit_to_uber(session, phone, tokens):
 
     try:
         logging.info(f"Submitting: {full_number}")
-        res = session.post(UBER_SUBMIT_URL.strip(), json=payload, headers=dynamic_headers, timeout=10)
+        res = session.post(UBER_SUBMIT_URL.strip().replace(" ", ""), json=payload, headers=dynamic_headers, timeout=10)
         if res.status_code == 200:
             logging.info(f"[SUCCESS] Submitted: {full_number}")
             return True
