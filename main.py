@@ -9,16 +9,25 @@ import re
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Configuration ---
-UBER_LOGIN_URL = "https://auth.uber.com/v2/ "  # No trailing space
-UBER_SUBMIT_URL = "https://auth.uber.com/v2/submit-form "  # No trailing space
+UBER_LOGIN_URL = (
+    "https://auth.uber.com/v2/?breeze_init_req_id=7a7db0f0-4ce5-4b4d-bc45-cbce3ef4999f "
+    "&breeze_local_zone=phx6&next_url=https%3A%2F%2Fm.uber.com%2Flogin-redirect%2F"
+    "%3Fmarketing_vistor_id%3D43139685-07cf-4836-80bd-dcbf077de8db%26previousPath%3D%252F"
+    "%26uclick_id%3Dbb971367-5b8d-4c39-8c2c-f95e73bd096b&state=3AeIps-hR9KGubqmqdpnsZGHV4Tb64W5r2UARh9gXFA%3D"
+)
+
+UBER_SUBMIT_URL = "https://auth.uber.com/v2/submit-form "
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
-    "Referer": UBER_LOGIN_URL,
-    "Origin": "https://auth.uber.com "
+    "Referer": "https://auth.uber.com/ ",
+    "Origin": "https://auth.uber.com ",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept": "*/*"
 }
 
-COUNTRY_CODE = "+91"  # Changed to India
+COUNTRY_CODE = "+91"  # India
 POLL_INTERVAL = 60  # Seconds between checks
 
 # --- Utility Functions ---
