@@ -9,8 +9,8 @@ import re
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Configuration ---
-UBER_LOGIN_URL = "https://auth.uber.com/v2/ "
-UBER_SUBMIT_URL = "https://auth.uber.com/v2/submit-form "
+UBER_LOGIN_URL = "https://auth.uber.com/v2/ "  # No trailing space
+UBER_SUBMIT_URL = "https://auth.uber.com/v2/submit-form "  # No trailing space
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
@@ -18,14 +18,17 @@ HEADERS = {
     "Origin": "https://auth.uber.com "
 }
 
-COUNTRY_CODE = "+504"  # Change if needed
+COUNTRY_CODE = "+91"  # Changed to India
 POLL_INTERVAL = 60  # Seconds between checks
 
 # --- Utility Functions ---
 
 def load_phone_numbers():
     try:
-        df = pd.read_excel("phone_numbers.xlsx")
+        df = pd.read_excel("phone_numbers.xlsx", engine="openpyxl")
+        if "phone_number" not in df.columns:
+            logging.error("Column 'phone_number' not found in Excel file.")
+            return set()
         return set(df["phone_number"].astype(str).str.strip().tolist())
     except Exception as e:
         logging.error(f"Error loading phone numbers: {e}")
@@ -50,7 +53,7 @@ def mark_as_used(number):
 def extract_tokens_and_cookies(session):
     try:
         logging.info("Fetching initial page to extract dynamic tokens...")
-        res = session.get(UBER_LOGIN_URL, headers=HEADERS)
+        res = session.get(UBER_LOGIN_URL.strip(), headers=HEADERS)
         res.raise_for_status()
 
         # Extract marketing visitor ID from Set-Cookie header
@@ -87,21 +90,21 @@ def submit_to_uber(session, phone, tokens):
         "X-Csrf-Token": tokens["xsrf_token"] or "x",
         "X-Uber-Analytics-Session-Id": tokens["analytics_session_id"] or "fallback-id",
         "X-Uber-Marketing-Id": tokens["marketing_id"] or "fallback-marketing-id",
-        "X-Uber-Client-Name": "usl_desktop",
         "X-Uber-Challenge-Provider": "ARKOSE_TOKEN",
         "X-Uber-Challenge-Token": "65818426586360715.3227652504|r=ap-southeast-1|meta=3|metabgclr=transparent|metaiconclr=%23757575|guitextcolor=%23000000|pk=30000F36-CADF-490C-929A-C6A7DD8B33C4|at=40|sup=1|rid=90|ag=101|cdn_url=https%3A%2F%2Fuber-api.arkoselabs.com%2Fcdn%2Ffc|surl=https%3A%2F%2Fuber-api.arkoselabs.com|smurl=https%3A%2F%2Fuber-api.arkoselabs.com%2Fcdn%2Ffc%2Fassets%2Fstyle-manager",
+        "X-Uber-Client-Name": "usl_desktop",
         "X-Uber-Request-Uuid": "bed3ea30-81c1-44ae-a14a-67db0ed53737",
         "X-Uber-Usl-Id": tokens["marketing_id"] or "fallback-marketing-id"
     })
 
     payload = {
         "phoneNumber": full_number,
-        "nextUrl": "/login-redirect/..."  # Update this based on real value
+        "nextUrl": "/login-redirect/..."  # You can update this based on real value
     }
 
     try:
         logging.info(f"Submitting: {full_number}")
-        res = session.post(UBER_SUBMIT_URL, json=payload, headers=dynamic_headers, timeout=10)
+        res = session.post(UBER_SUBMIT_URL.strip(), json=payload, headers=dynamic_headers, timeout=10)
         if res.status_code == 200:
             logging.info(f"[SUCCESS] Submitted: {full_number}")
             return True
